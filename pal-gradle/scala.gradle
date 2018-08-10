@@ -1,0 +1,50 @@
+
+
+// be sure that the repository exists
+
+
+if (!rootProject.file("../peterlavalle.sbt/target/m2-repo/com/peterlavalle/peterlavalle_2.12/${pal.peterVersion}/peterlavalle_2.12-${pal.peterVersion}.jar").exists()) {
+  println("I didn't find BASECODE, so I'm building it ...")
+  ant.java(
+    jar: rootProject.file("../peterlavalle.sbt/sbt-launch.jar"),
+    fork: true,
+    dir: rootProject.file("../peterlavalle.sbt/")
+  ) {
+    arg(value: 'publish')
+  }
+  println('... done! (I think)')
+}
+
+apply from: rootProject.file('../pal-gradle/version.gradle')
+
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'groovy'
+
+install.dependsOn(scaladoc)
+publish.dependsOn(scaladoc)
+
+compileScala.targetCompatibility = '1.8'
+
+task deploy(dependsOn: [test, publish]) {
+  group = 'verification'
+}
+
+publishing {
+  repositories {
+    maven { url rootProject.file('../peterlavalle.sbt/target/m2-repo/') }
+  }
+
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+    }
+  }
+}
+
+dependencies {
+	compile "com.peterlavalle:peterlavalle_${pal.scalaFlavour}:${pal.peterVersion}"
+	testCompile "com.peterlavalle:junit_${pal.scalaFlavour}:${pal.peterVersion}"
+}

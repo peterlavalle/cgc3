@@ -1,0 +1,12 @@
+
+buildscript {
+	apply from: rootProject.file('../pal-gradle/version.gradle')
+
+	dependencies {
+		classpath "com.peterlavalle:punity:${pal.peterVersion}"
+	}
+}
+
+apply from: rootProject.file('../pal-gradle/version.gradle')
+
+apply plugin: 'peterlavalle.punity'

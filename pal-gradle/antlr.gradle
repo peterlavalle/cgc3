@@ -1,0 +1,17 @@
+
+apply from: rootProject.file('../pal-gradle/version.gradle')
+
+apply plugin: 'antlr'
+
+generateGrammarSource {
+	arguments = [
+		'-no-listener',
+		'-no-visitor',
+		'-package', ('peterlavalle.' + (rootProject.name)),
+	]
+}
+
+dependencies {
+	antlr "org.antlr:antlr4:${pal.antlrVersion}"
+	compile "com.peterlavalle:antlr_${pal.scalaFlavour}:${pal.peterVersion}"
+}

@@ -1,0 +1,8 @@
+
+include ':duktape'
+include ':coffeescript'
+include ':coffeescript-test-1'
+include ':coffeescript-test-2'
+include ':coffeescript-test-shared'
+include ':duktape'
+include ':miniz'

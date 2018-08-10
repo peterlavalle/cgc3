@@ -1,0 +1,93 @@
+
+buildscript {
+  apply from: '../pal-gradle/version.gradle'
+}
+
+description = "Peter LaValle's cgc3 plugins"
+
+allprojects {
+  apply from: rootProject.file('../pal-gradle/version.gradle')
+  apply from: rootProject.file('../pal-gradle/scala.gradle')
+
+  compileGroovy.dependsOn(compileScala)
+
+  dependencies {
+    compile "com.peterlavalle:peterlavalle_${pal.scalaFlavour}:${pal.peterVersion}"
+  }
+
+  apply plugin: 'groovy'
+
+  sourceSets {
+    main {
+      groovy.srcDirs += file('src/main.gradle/groovy/')
+      java.srcDirs += file('src/main.gradle/java/')
+      scala.srcDirs += file('src/main.gradle/scala/')
+      resources.srcDirs += file('src/main.gradle/resources/')
+    }
+  }
+}
+
+project(':muntd') {
+
+  dependencies {
+    // for ssh-client
+    // ... which might be redundant if mina (in fact) includes a client
+    compile 'com.jcraft:jsch:0.1.54'
+
+    // for mina-sshd; the server
+    compile group: 'org.apache.sshd', name: 'sshd-core', version: '2.0.0'
+    compile group: 'org.apache.sshd', name: 'sshd-scp', version: '2.0.0'
+    compile group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.0.0'
+  }
+}
+
+// project(':signal') {
+//   apply from: rootProject.file('../pal-gradle/antlr.gradle')
+// }
+
+project(':tinflu') {
+  dependencies {
+    compile rootProject
+    compile 'com.github.luccappellaro:jzopfli:0.0.4'
+
+    compileOnly gradleApi()
+    testCompile gradleApi()
+  }
+}
+
+//project(':smolir') {
+//  apply plugin: 'antlr'
+//  apply from: rootProject.file('../pal-gradle/antlr.gradle')
+//  generateGrammarSource.arguments = [
+//    '-no-listener',
+//    '-no-visitor',
+//    '-package', 'peterlavalle.smolir'
+//  ]
+//  dependencies {
+//    compile rootProject
+//
+//    compileOnly gradleApi()
+//    testCompile gradleApi()
+//  }
+//}
+
+
+dependencies {
+
+  compile 'org.json:json:20180130'
+
+  runtime group: 'org.codehaus.groovy', name: 'groovy-jsr223', version: '2.4.13'
+
+  compileOnly gradleApi()
+  testCompile gradleApi()
+
+}
+
+project(':cgc3-plugins') {
+  description = 'Empty aggregate project'
+  dependencies {
+    compile rootProject
+    compile project(':tinflu')
+    // compile project(':smolir')
+  }
+}

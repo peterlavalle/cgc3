@@ -1,0 +1,55 @@
+buildscript {
+	def peterVersion =
+		"default-SNAPSHOT"
+	repositories {
+		maven { url "${System.properties['user.home']}/.m2/repository/" }
+		mavenCentral()
+		jcenter()
+		maven { url "https://peterlavalle.github.io/m2-repo/" }
+// ivy {
+// 	url "${System.properties['user.home']}/.ivy2/local"
+// 	layout 'pattern', {
+// 		artifact "[organisation]/[module]/[revision]/jars/[module](.[ext])"
+// 		// artifact "[organisation]/[module]/[revision]/[artifact](-[classifier])-[revision](.[ext])"
+// 		// ivy "[organisation]/[module]/[revision]/[artifact](-[classifier])-[revision](.[ext])"
+// 	}
+// }
+	}
+	dependencies {
+		classpath "com.peterlavalle:cgc3:${peterVersion}"
+	}
+}
+
+apply plugin: 'peterlavalle.cgc3-solution'
+
+cgc3 {
+	// emit lots of status text to inform us how the build is progressing
+	verbose = true
+}
+
+project(':shared') {
+	apply plugin: 'peterlavalle.cgc3-library'
+}
+
+project(':binary') {
+	apply plugin: 'peterlavalle.cgc3-binary'
+
+	cgc3 {
+		lib project(':shared')
+	}
+}
+
+project(':checks') {
+	apply plugin: 'peterlavalle.cgc3-check'
+
+	cgc3 {
+		lib project(':shared')
+	}
+}
+
+
+// TODO; pack with upx; https://upx.github.io/
+// > https://github.com/upx/upx/releases/download/v3.94/upx394wce.zip
+// > https://github.com/upx/upx/releases/download/v3.94/upx-3.94-amd64_linux.tar.xz
+// > https://github.com/upx/upx/releases/download/v3.94/upx-3.94-i386_linux.tar.xz 
+// > https://github.com/upx/upx/releases/download/v3.94/upx-3.94-armeb_linux.tar.xz

@@ -1,0 +1,36 @@
+Block
+	Value PassthroughLiteral:
+	Value
+		Call
+			Value IdentifierLiteral: require
+			Value StringLiteral: 'std'
+	Assign
+		Value IdentifierLiteral: points
+		Value
+			Call
+				Value IdentifierLiteral: std
+					Access PropertyName: in
+					Access PropertyName: readline
+				Value IdentifierLiteral: std
+					Access PropertyName: int32
+	Assign
+		Value IdentifierLiteral: points
+		Value
+			Call
+				Value
+					Range
+						Value IdentifierLiteral: points
+						Value NumberLiteral: 1
+					Access PropertyName: map
+				Code
+					Param IdentifierLiteral: point
+					Block
+						Value
+							Call
+								Value IdentifierLiteral: std
+									Access PropertyName: in
+									Access PropertyName: readline
+								Value IdentifierLiteral: std
+									Access PropertyName: int32
+								Value IdentifierLiteral: std
+									Access PropertyName: int32

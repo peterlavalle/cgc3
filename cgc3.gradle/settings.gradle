@@ -1,0 +1,8 @@
+rootProject.name = 'cgc3'
+
+include ':muntd'
+//include ':signal'
+include ':tinflu'
+//include ':smolir'
+
+include ':cgc3-plugins'

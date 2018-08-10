@@ -1,3 +1,4 @@
+**NOTE** the message `TODO; prevent name collisionts on (cpp,obj)` is for (me) the cgc3 developer.
 
 # cgc3
 

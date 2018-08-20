@@ -6,6 +6,14 @@ import peterlavalle.ATestCase
 import peterlavalle.TreeFolder._
 
 class YggdrasilTest extends ATestCase with TTestCase {
+	def plonk: Plonk =
+		new Plonk {
+			override def ifVerbose(action: => Unit): Unit = action
+
+			override def outline(o: => String): Unit = o.split("[\r \t]*\n").foreach((o: String) => System.out.println(getName + " ; " + o))
+
+			override def errline(e: => String): Unit = e.split("[\r \t]*\n").foreach((e: String) => System.err.println(getName + " ! " + e))
+		}
 
 	lazy val goal: File = new File("examples") / "basic"
 	lazy val build: File = goal / "build" / "test" / getName
@@ -21,7 +29,7 @@ class YggdrasilTest extends ATestCase with TTestCase {
 
 			def errline(s: String) = System.err.println(getName + ":" + name + "/" + s)
 
-			yggdrasil.run("cpp", "obj")(GCC.compile(Seq("-g"), yggdrasil, ".+\\.(c|cpp)", action => action, outline, errline))
+			yggdrasil.run("cpp", "obj")(GCC.compile(plonk)(Seq("-g"), yggdrasil, ".+\\.(c|cpp)"))
 
 			yggdrasil
 		}
@@ -42,13 +50,10 @@ class YggdrasilTest extends ATestCase with TTestCase {
 
 			// make the exe link
 			code.asm("obj") {
-				GCC.assemble(
+				GCC.assemble(plonk)(
 					Seq("-g"),
 					code,
-					name,
-					action => action,
-					outline,
-					errline
+					name
 				)
 			}
 

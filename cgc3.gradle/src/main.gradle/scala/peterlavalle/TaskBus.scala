@@ -23,15 +23,6 @@ object TaskBus {
 			anchor(project)[T].hook(data, work)
 		}
 
-	// lazily create the central anchor ... thing ...
-	def anchor(project: Project): AnchorCollection =
-		project.getRootProject.getExtensions.findByType(classOf[AnchorCollection]) match {
-			case null =>
-				project.getRootProject.getExtensions.create(classOf[AnchorCollection].getName, classOf[AnchorCollection])
-			case anchor: AnchorCollection =>
-				anchor
-		}
-
 	def connect[T <: Object](project: Project, data: T)(implicit classTag: ClassTag[T]): Unit =
 		synchronized {
 			anchor(project)[T].hook(data)
@@ -40,6 +31,15 @@ object TaskBus {
 	def consume[T <: Object](project: Project)(work: T => Unit)(implicit classTag: ClassTag[T]): Unit =
 		synchronized {
 			anchor(project)[T].hook(work)
+		}
+
+	// lazily create the central anchor ... thing ...
+	def anchor(project: Project): AnchorCollection =
+		project.getRootProject.getExtensions.findByType(classOf[AnchorCollection]) match {
+			case null =>
+				project.getRootProject.getExtensions.create(classOf[AnchorCollection].getName, classOf[AnchorCollection])
+			case anchor: AnchorCollection =>
+				anchor
 		}
 
 	final class AnchorExtension[T] {
@@ -93,4 +93,5 @@ object TaskBus {
 			anchor(classTag.runtimeClass.asInstanceOf[Class[T]]).asInstanceOf[AnchorExtension[T]]
 		}
 	}
+
 }

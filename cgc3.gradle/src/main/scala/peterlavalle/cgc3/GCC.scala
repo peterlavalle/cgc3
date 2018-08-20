@@ -2,19 +2,18 @@ package peterlavalle.cgc3
 
 import java.io.File
 
+import org.codehaus.plexus.util.cli.Commandline
 import peterlavalle.TreeFolder
 
 object GCC {
 
-
-	def assemble(args: Seq[String], yggdrasil: Yggdrasil, name: String, ifVerbose: (=> Unit) => Unit, outline: String => Unit, errline: String => Unit): Yggdrasil.Assembler = {
+	def assemble(plonk: Plonk)(args: Seq[String], yggdrasil: Yggdrasil, name: String): Yggdrasil.Assembler = {
 		(out: File, _: Iterable[TreeFolder]) =>
 
-			val bin: File =
-				out / name.exe
+			val bin: File = out / name.exe
 
 			val obj: Seq[File] =
-				yggdrasil.sourceTransitive("obj").flatten.toSeq.map {
+				yggdrasil.sourceTransitive("obj").flatten.toSeq.distinctBy(_._2).map {
 					case (root, path) =>
 						require(path.endsWith(".o") || path.endsWith(".d"))
 						if (path.endsWith(".o"))
@@ -22,32 +21,49 @@ object GCC {
 						else {
 							""
 						}
-				}.filterNot((_: Object).isInstanceOf[String]).map((_: Object).asInstanceOf[File])
+				}.filterTo[File].toSeq
 
-			out.Shell("g++")
+			plonk.ifVerbose {
+				plonk.outline(
+					obj.foldLeft(s"linking ${bin.AbsolutePath} from:")((_: String) + "\n\t" + (_: File).AbsolutePath)
+				)
+			}
+
+			val commandLine: Commandline = out.Shell("g++")
 				.newArgs(args: _ *)
 				.newArgs("-o", bin)
 				.newArgs(obj: _ *)
-				.invoke(o => outline(o), e => errline(e)) match {
-				case 0 =>
-					ifVerbose {
-						outline("built")
-					}
 
-				case r =>
-					throw new Exception {
-						s"linking failed with r = $r, out=`${bin.AbsolutePath}` and:" match {
-							case left: String =>
-								args.foldLeft(left)(_ + "\n\targ: >" + _ + "<") match {
-									case left: String =>
-										obj.foldLeft(left)(_ + "\n\tobj: >" + _.AbsolutePath + "<")
-								}
+			val start: Long = System.currentTimeMillis()
+
+			def sec: String =
+				((System.currentTimeMillis() - start) * 0.001).toString.split("\\.").toList match {
+					case List(full: String, partial: String) =>
+						full + "." + partial.take(3) + "sec"
+				}
+
+			commandLine
+				.text {
+					case (0, out: Iterable[String], Nil) =>
+						plonk.ifVerbose {
+							out.foreach(l => plonk.outline(l))
 						}
-					}
-			}
+						plonk.outline(s"linking completed in $sec")
+
+					case (r, out: Iterable[String], err: Iterable[String]) =>
+						assume(null != bin, "How is `bin` null?")
+						val message: String = s"linking failed with r = $r, out=`${bin.AbsolutePath}` and:" ~
+							args ~ ((_: String) + "\n\t\targ: >" + (_: String) + "<") ~
+							obj ~ ((_: String) + "\n\t\tobj: >" + (_: File).AbsolutePath + "<") ~
+							out ~ ((_: String) + "\n\t\tout; " + (_: String)) ~
+							err ~ ((_: String) + "\n\t\terr! " + (_: String))
+
+						message.split("[\r \t]*\n").foreach(l => plonk.errline(l))
+						throw new Exception(message)
+				}
 	}
 
-	def compile(args: Seq[String], yggdrasil: Yggdrasil, pattern: String, ifVerbose: (=> Unit) => Unit, outline: String => Unit, errline: String => Unit): Yggdrasil.Compiler =
+	def compile(plonk: Plonk)(args: Seq[String], yggdrasil: Yggdrasil, pattern: String): Yggdrasil.Compiler =
 		(out: File, ygg: Yggdrasil, from: File, path: String) =>
 			if (path matches pattern) {
 
@@ -66,33 +82,48 @@ object GCC {
 				def objAge: Long = obj.lastModified()
 
 				if (obj.exists() && dep.exists() && objAge > srcAge)
-					ifVerbose {
-						outline(path + " is up to date")
+					plonk.ifVerbose {
+						plonk.outline(path + " is up to date")
 					}
-				else
+				else {
+
+					// we want newest first
+					// https://stackoverflow.com/questions/41437648/specifying-order-in-gcc-and-g-include-and-lib-paths#41440237
+					val inc: Seq[File] =
+					ygg
+						.sourceTransitive("cpp")
+						.filter((_: TreeFolder).root.exists())
+						.toList
+						.map((_: TreeFolder).root)
+
+					plonk.ifVerbose {
+						plonk.outline(
+							inc.foldLeft(s"compiling ${src.AbsolutePath} with:")((_: String) + "\n\t" + (_: File).AbsolutePath)
+						)
+					}
+
 					out
 						.Shell("g++")
 						.newArg("-MMD") // generate .d files for time checks
 						.newArgs(args: _ *)
 						.newArgs("-c", "-o", obj)
-						.allArgs(ygg.sourceTransitive("cpp").filter((_: TreeFolder).root.exists())) {
-							inc: TreeFolder =>
-								"-I" + inc.root.AbsolutePath
+						.allArgs(inc) {
+							inc: File =>
+								"-I" + inc.AbsolutePath
 						}
 						.newArg(src)
 						.invoke(
-							(o: String) => outline(path + ";" + o),
-							(e: String) => errline(path + "!" + e)
+							(o: String) => plonk.outline(path + ";" + o),
+							(e: String) => plonk.errline(path + "!" + e)
 						) match {
 						case 0 =>
-							ifVerbose {
-								outline(path + " compiled successfully!")
+							plonk.ifVerbose {
+								plonk.outline(path + " compiled successfully!")
 							}
 
 						case r =>
 							sys.error(s"failed compile!, r = $r\n\t${src.AbsolutePath}")
 					}
+				}
 			}
-
-
 }

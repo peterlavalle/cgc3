@@ -10,10 +10,10 @@ class TaskCompile extends ATask {
 	var pattern: String = ".+\\.(c|cpp)"
 
 	def args: Seq[String] =
-		getProject.rootExt[CGC3.Root].gccArgs.split(" ")
+		getProject.rootExt[CGC3.Root].cgc3GCCArgs.split(" ")
 
 	getProject.ext[CGC3].yggdrasil.run("cpp", "obj") {
-		GCC.compile(args, getProject.ext[CGC3].yggdrasil, pattern, getProject.rootExt[CGC3.Root].ifVerbose, println, errorln)
+		GCC.compile(plonk)(args, getProject.ext[CGC3].yggdrasil, pattern)
 	}
 
 	@TaskAction

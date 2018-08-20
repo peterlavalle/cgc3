@@ -1,9 +1,7 @@
 package peterlavalle.cgc3
 
-import org.gradle.api.Project
-
 class PluginCheck extends APlugin.ACompilePlugin {
-	override def setup(project: Project): Unit = {
+	setup {
 		val generate: TaskGenerate = project.createTask[TaskGenerate]
 		val compile: TaskCompile = project.createTask[TaskCompile]
 		val link: TaskAssemble = project.createTask[TaskAssemble]

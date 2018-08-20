@@ -7,14 +7,14 @@ import peterlavalle._
 import peterlavalle.cgc3.PluginSolution.TaskSolution
 
 class PluginSolution extends APlugin {
-	override def setup(project: Project): Unit = {
+	setup {
 		project.defaultTasks("solution")
 		require(project == project.getRootProject)
 		project.createTask[TaskSolution]
 	}
 }
 
-object PluginSolution extends TGradle {
+object PluginSolution extends PGradleProject {
 
 	implicit class pLeaf(leaf: VCodeGradle.TVCTaskLeaf) {
 		def taskLabel: String = s"${leaf.getProject.getPath} - ${leaf.getName}".trim
@@ -104,7 +104,7 @@ object PluginSolution extends TGradle {
 				.appund {
 					new JSONObject()
 						.put("version", "2.0.0")
-						.put("tasks", taskList.foldLeft(new JSONArray())((_: JSONArray) put (_: JSONObject)))
+						.put("tasks", taskList.distinctBy(_.getString("label")).foldLeft(new JSONArray())((_: JSONArray) put (_: JSONObject)))
 						.toString(1)
 				}
 				.closeFile
@@ -129,7 +129,7 @@ object PluginSolution extends TGradle {
 
 									// set the name
 									require(!json.has("name"), "don't add this! I'll do it for you")
-									json.put("name", json.getString("type") + " - " + task.asInstanceOf[Task].getPath)
+									json.put("name", task.asInstanceOf[Task].getProject.getPath)
 
 									// set the default CWD
 									if (!json.has("cwd"))

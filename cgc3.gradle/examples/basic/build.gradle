@@ -1,6 +1,6 @@
 buildscript {
 	def peterVersion =
-		"default-SNAPSHOT"
+		"??? unknown???"
 	repositories {
 		maven { url "${System.properties['user.home']}/.m2/repository/" }
 		mavenCentral()

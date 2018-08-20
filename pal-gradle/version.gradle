@@ -1,6 +1,6 @@
 
 def peterVersionAuto = {
-	"default-SNAPSHOT"
+	"??? unknown???"
 }
 
 repositories {
@@ -26,3 +26,4 @@ allprojects {
 	group = 'com.peterlavalle'
 	version = pal.peterVersion
 }
+

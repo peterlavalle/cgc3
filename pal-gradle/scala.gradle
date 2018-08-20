@@ -32,6 +32,11 @@ task deploy(dependsOn: [test, publish]) {
   group = 'verification'
 }
 
+task sourceJar(type: Jar) {
+    classifier 'sources'
+    from (sourceSets.main.allJava + sourceSets.main.allScala + sourceSets.main.allGroovy + sourceSets.main.resources)
+}
+
 publishing {
   repositories {
     maven { url rootProject.file('../peterlavalle.sbt/target/m2-repo/') }
@@ -40,6 +45,7 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
+      artifact tasks.sourceJar
     }
   }
 }

@@ -3,9 +3,25 @@ package peterlavalle
 import java.io.{File, InputStream}
 
 import scala.collection.immutable.Stream.Empty
+import scala.reflect.ClassTag
 
 package object cgc3
 	extends peterlavalle.TPackage {
+
+	implicit class pObject2[A](o: A) {
+		def asEither[V, L, R](l: L => V, r: R => V)(implicit lTag: ClassTag[L], rTag: ClassTag[L]): V = {
+
+			val lClass: Class[L] = lTag.runtimeClass.asInstanceOf[Class[L]]
+			val rClass: Class[R] = rTag.runtimeClass.asInstanceOf[Class[R]]
+
+			if (lClass.isInstance(o))
+				l(lClass.cast(o))
+			else {
+				require(rClass.isInstance(o))
+				r(rClass.cast(o))
+			}
+		}
+	}
 
 	implicit class pString2cgc(name: String) {
 		def exe: String =
@@ -28,30 +44,28 @@ package object cgc3
 		action(System.getProperty("os.name").takeWhile(' ' != (_: Char)).toLowerCase, System.getProperty("os.arch").toLowerCase)
 
 	implicit class pFile3(file: File) {
-		def touch: Unit = {
-			(if (file.absent)
-				new OverWriter(file).closeFile
-			else
-				file).setLastModified(System.currentTimeMillis())
+		def touch: File = {
+			(file.absent ?/ new OverWriter(file).closeFile :/ file)
+				.setLastModified(System.currentTimeMillis())
+			file.getAbsoluteFile
 		}
 
 		def absent: Boolean = !file.exists
 
 		def makeExecutable: File = ifNotExecutable(f => List("chmod", "+=rwx", f.AbsolutePath))
 
+		def nonExecute: Boolean = !file.canExecute
+
 		def ifNotExecutable(command: File => Seq[String]): File = {
 			require(file.exists())
-			if (file.canExecute)
-				file
-			else
-				(command apply file) toList match {
-					case command :: head :: tail =>
-						file.ParentFile.Shell(command, head, tail: _ *)
-							.text {
-								case (0, Nil, Nil) =>
-									file
-							}
-				}
+			nonExecute ?/ ((command apply file) toList match {
+				case command :: head :: tail =>
+					file.ParentFile.Shell(command, head, tail: _ *)
+						.text {
+							case (0, Nil, Nil) =>
+								file
+						}
+			}) :/ file
 		}
 	}
 

@@ -4,12 +4,21 @@
 
 This is a (Gradle) system to (invoke *just* `g++` and) build C/++ (et al) uniformly across Win/Lin/Mac either from the command line or using (*just* `gdb` and) VCode as the GUI/IDE.
 
+# setup
+
+- i installed http://mingw-w64.org/doku.php
+  - first i tried msys, then, ming64
+  - later, i discovered that Haskell *had* installed
+
+
 - everything requires;
   - `java` / `javac`; I'm using `java version "10.0.1"`
   - `g++`; I'm using `gcc version 7.2.0`
+    - ... on Windows from Haskell 8.4.3
 - editing with Visual Code requires;
   - Visual Code; I'm using whatever the rolling version is ... hmm ...
   - (to debug) `gdb` I'm using `GNU gdb (GDB) 7.10.1`
+    - ... on Windows from Haskell 8.4.3
   - (optionally) Visual Code's C/++ stuff;
 
 If the commands `javac` `g++` and `gdb` work from your command prompt; you're good to go.
@@ -49,7 +58,7 @@ Assuming that you have your root project, and, `:shared` `:binary`, and `:checks
 ```
   buildscript {
     def version = {
-      "default-SNAPSHOT"
+      "??? unknown???"
     }
     repositories {
       maven { url "https://peterlavalle.github.io/m2-repo/" }
@@ -84,7 +93,7 @@ Once you're confident that it's running, you can (obviously) add more modules as
 
 ## Command Line
 
-Running `./gradlew tasks` will list tasks in the project, and, should now show 
+Running `./gradlew tasks` will list tasks in the project, and, should now show
 By default, `peterlavalle.cgc3-solution` sets the `defaultTasks` to run the `solution` task and generate the `.vscode` files used to invoke things.
 
 ## Visual Code

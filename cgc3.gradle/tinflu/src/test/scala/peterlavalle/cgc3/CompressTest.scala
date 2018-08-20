@@ -9,11 +9,13 @@ import peterlavalle.ATestCase
 import scala.io.Source
 
 class CompressTest extends ATestCase {
-	val coffeeScriptFile = new File("foo").ParentFile / "../examples/coffeescript/coffeescript/src/coffeescript-2.3.1.js"
-	val List(coffeeScriptSource: String) =
+	val coffeeScriptFile = new File("foo").ParentFile / "../../coffeeskript.cgc/coffeescript/src/coffeescript-1.12.8.js"
+	val coffeeScriptSource: String =
 		coffeeScriptFile
 			.sourceLines.filter("" != (_: String))
-			.toList
+			.toList.reduce(_ + "\n" + _)
+
+
 	val coffeeScriptBytes: Array[Byte] = new FileInputStream(coffeeScriptFile).toArrays.toArray.flatten
 
 	def testLoading(): Unit = {
@@ -31,8 +33,8 @@ class CompressTest extends ATestCase {
 	}
 
 	def testLengthsHard(): Unit = {
-		assertEquals(397121, coffeeScriptBytes.length)
-		assertEquals(397121, coffeeScriptFile.length())
+		assertEquals(203247, coffeeScriptBytes.length)
+		assertEquals(203247, coffeeScriptFile.length())
 	}
 
 	def testCompressDecompressCoffee(): Unit =

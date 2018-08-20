@@ -6,21 +6,20 @@ import org.gradle.api.tasks.TaskAction
 
 class TaskAssemble extends ATask
 	with VCodeGradle.TGDBLauncher
-	with VCodeGradle.TVCTaskGCC
+	with VCodeGradle.TVCTaskGCC // TODO; make a non-build task for this (et al) once the "polish build" thingie is in place
+	with VCodeGradle.TVCTaskRoot
 	with TCGCProblemMatcher {
+
 
 	override lazy val target: File =
 		getProject.getBuildDir / (getProject.getName exe)
 
 	// perform the assembly
 	getProject.ext[CGC3].yggdrasil.asm("obj") {
-		GCC.assemble(
+		GCC.assemble(plonk)(
 			args,
 			getProject.ext[CGC3].yggdrasil,
-			getProject.getName,
-			getProject.rootExt[CGC3.Root].ifVerbose,
-			println,
-			errorln
+			getProject.getName
 		)
 	}
 
@@ -33,10 +32,10 @@ class TaskAssemble extends ATask
 	}
 
 	def args: Seq[String] =
-		getProject.rootExt[CGC3.Root].gccArgs.split(" ")
+		getProject.rootExt[CGC3.Root].cgc3GCCArgs.split("\\s+").filter((_: String).nonEmpty)
 
 	@TaskAction
-	def assemblyAction(): Unit = {
+	def assembleAction(): Unit = {
 		getProject.ext[CGC3].yggdrasil.compile("obj")
 	}
 }

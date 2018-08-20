@@ -7,6 +7,8 @@ import scala.reflect.ClassTag
 
 trait TPackage
   extends TContextDependantMapping
+    with PBoolean
+    with PChain
     with PFile
     with PFunction
     with PIterable
@@ -54,12 +56,14 @@ trait TPackage
         .dropWhile((_: StackTraceElement).getMethodName.matches("STUB\\$?"))
     }
 
+    // print the stack trace
     runtimeException.printStackTrace(System.out)
     System.out.flush()
     Thread.sleep(10)
     runtimeException.printStackTrace(System.err)
     System.err.flush()
 
+    // now exit
     System.exit(-1)
     throw runtimeException
   }

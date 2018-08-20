@@ -9,7 +9,7 @@ lazy val commonSettings =
 	Seq(
 		organization := "com.peterlavalle",
 		version := {
-			"default-SNAPSHOT"
+			"??? unknown???"
 		},
 		javacOptions ++= Seq("-encoding", "UTF-8"),
 		scalaVersion := "2.12.3",

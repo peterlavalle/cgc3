@@ -1,0 +1,40 @@
+
+//
+// this is a script to build cgc3 if it isn't present
+//
+
+// start with the SBT stuff ...
+
+
+if (!rootProject.file("../peterlavalle.sbt/target/m2-repo").exists()) {
+  println("I didn't find BASECODE, so I'm building it ...")
+  ant.java(
+    jar: rootProject.file("../peterlavalle.sbt/sbt-launch.jar"),
+    fork: true,
+    dir: rootProject.file("../peterlavalle.sbt/")
+  ) {
+    arg(value: 'publish')
+  }
+  println('... done! (I think)')
+}
+
+// now! do the gradle stuff
+
+if (!rootProject.file("../peterlavalle.sbt/target/m2-repo/com/peterlavalle/cgc3-plugins/${pal.peterVersion}/maven-metadata.xml").exists()) {
+    println("I didn't find cgc3.gradle/ so I'm building it ...")
+    ant.exec(
+        osfamily: 'windows',
+        executable: rootProject.file("../cgc3.gradle/gradlew.bat"),
+        dir: rootProject.file("../cgc3.gradle/")
+    ) {
+        arg(value: 'publish')
+    }
+    ant.exec(
+        osfamily: 'unix',
+        executable: rootProject.file("../cgc3.gradle/gradlew"),
+        dir: rootProject.file("../cgc3.gradle/")
+    ) {
+        arg(value: 'publish')
+    }
+    println('... done! (I think)')
+}

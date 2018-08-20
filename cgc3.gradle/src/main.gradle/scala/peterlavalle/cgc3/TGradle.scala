@@ -1,71 +1,76 @@
 package peterlavalle.cgc3
 
-import java.io.File
+import org.gradle.api.{GradleException, Project, Task}
 
-import org.gradle.api.internal.AbstractTask
-import org.gradle.api.{Project, UnknownDomainObjectException}
+trait TGradle extends PGradleProject {
 
-import scala.reflect.ClassTag
+	lazy val plonk: Plonk = {
+		def project: Project =
+			this match {
+				case task: Task => task.getProject
+				case once: TProjectSetOnce => once.project
 
-trait TGradle {
-
-	implicit class pProject(project: Project) {
-
-		/**
-			* reads a target-specific dir in build
-			*/
-		def tripletDir: File = project.getBuildDir / ('_' + System.getProperty("os.name") + '_').replaceAll("([^\\w]|_)+", "_").tail.reverse.tail.reverse / System.getProperty("os.arch")
-
-		def rootExt[E <: AnyRef](implicit eTag: ClassTag[E]): E =
-			project.getRootProject.ext[E]
-
-		/**
-			* find an extension by (implicit) type
-			*/
-		def ext[E <: AnyRef](implicit eTag: ClassTag[E]): E =
-			try {
-				project.getExtensions.getByType(eTag.runtimeClass.asInstanceOf[Class[E]])
-			} catch {
-				case _: UnknownDomainObjectException =>
-					null.asInstanceOf[E]
-			}
-
-		def extend[E <: AnyRef](name: String)(implicit eTag: ClassTag[E]): E =
-			try {
-				project.getExtensions.getByType(eTag.runtimeClass.asInstanceOf[Class[E]])
-			} catch {
-				case _: UnknownDomainObjectException =>
-					project.getExtensions.create(
-						eTag.runtimeClass.getName,
-						eTag.runtimeClass.asInstanceOf[Class[E]]
+				case fail =>
+					sys.error(
+						s"trying to find project on ${fail.getClass.getName}"
 					)
 			}
 
-		def /(path: String): File =
-			if ('/' == path.head)
-				project.getRootProject / path.tail
-			else if (':' == path.head)
-				project.getBuildDir / System.getProperty("os.name") / System.getProperty("os.arch")
-			else
-				project.getProjectDir / path
+		new Plonk {
+			override def ifVerbose(action: => Unit): Unit = {
+				project.rootExt[CGC3.Root].ifVerbose(action)
+			}
 
-		def createTask[T <: AbstractTask](implicit tTag: ClassTag[T]): T = {
-			val taskClass: Class[T] = tTag.runtimeClass.asInstanceOf[Class[T]]
+			override def outline(o: => String): Unit = println(o)
 
-			require(
-				project.getTasks.filterTo[T].isEmpty
-			)
+			override def errline(e: => String): Unit = errline(e)
+		}
+	}
 
-			project.getTasks.create(
-				taskClass.getSimpleName.replace("Task", "").toLowerCase(),
-				taskClass
-			)
+	final def require(condition: Boolean): Unit =
+		require(condition, null)
+
+	final def require(condition: Boolean, message: => String): Unit =
+		if (!condition)
+			try {
+				failure(message)
+			} catch {
+				case g: GradleTaskException =>
+					throw g.stackChop(1)
+			}
+
+	final def failure(message: String = null): Unit =
+		throw new GradleTaskException(
+			message match {
+				case null => s"failure in $getPath"
+				case message: String => getPath + "! " + message
+			}
+		).stackChop(1)
+
+	final def println(o: Any): Unit =
+		o.toString.split("[\r \t]*\n").foreach {
+			line: String =>
+				System.out.println(getPath + "; " + line, "")
+		}
+
+	final def errorln(o: Any): Unit =
+		o.toString.split("[\r \t]*\n").foreach {
+			line: String =>
+				System.out.println(getPath + "! " + line, "")
+		}
+
+	def getPath: String
+
+	class GradleTaskException(message: String) extends GradleException(message: String) {
+		def stackChop(i: Int): GradleTaskException = {
+			setStackTrace(getStackTrace.drop(i))
+			this
 		}
 	}
 
 }
 
-object TGradle extends TGradle {
+object TGradle {
 
 	trait TTask {
 		def setup(project: Project)

@@ -12,7 +12,7 @@ import scala.beans.BeanProperty
 /**
 	* singleton.
 	*/
-class CGC3(val project: Project, mkdir: String => File) extends TGradle {
+class CGC3(val project: Project, mkdir: String => File) extends PGradleProject {
 
 	// TODO; punch the not-root stuff out to a subclass
 
@@ -78,8 +78,8 @@ object CGC3 {
 		override lazy val yggdrasil: Yggdrasil =
 			sys.error("this shouldn't exist on root")
 		@BeanProperty
-		var gccArgs: String =
-			System.getProperty("cgc3-gcc-args", "-g") match {
+		var cgc3GCCArgs: String =
+			System.getProperty("cgc3GCCArgs", "-D_DEBUG -std=c++14 -ggdb -g3") match {
 				case escaped if escaped.length >= 2 && escaped.startsWith("'") && escaped.endsWith("'") => escaped.tail.dropRight(1)
 				case okay => okay
 			}

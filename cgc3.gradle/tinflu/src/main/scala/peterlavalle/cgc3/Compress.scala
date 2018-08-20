@@ -87,7 +87,7 @@ object Compress {
 
 		require(
 			3 < iterations,
-			"No! Want more loopz!"
+			"No! Need more loopz!"
 		)
 
 		val zopfliOptions: ZopfliOptions = new ZopfliOptions()

@@ -213,7 +213,9 @@ object Yggdrasil {
 				*/
 			override def run(src: String, out: String)(action: Compiler): Unit = srcNames(src, out) {
 
-				System.err.println(s"TODO; prevent name collisionts on ($src,$out)")
+				require(src != out)
+				// TODO; prevent name collisionts on ($src,$out)
+				// ... whatever that means
 
 				// make us a folder
 				val gen: File = mkdir(s"$src/src") EnsureExists

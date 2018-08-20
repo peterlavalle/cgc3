@@ -77,13 +77,22 @@ object VCodeGradle {
 						.appund(":this bat file gives us an absolute path to the GDB command without requiring us to know where that exe is\n\n")
 						.appund("gdb %*\n\n")
 						.closeFile
-				case ("mac", "x86_64") =>
 
+				case ("mac", "x86_64") =>
 					System.err.println("WARN; Debugging on Mac is ... not tested ... yet")
 					new OverWriter(getProject.getRootProject.getBuildDir / "pLLDB.sh")
 						.appund("#!/bin/bash\n\n")
 						.appund("#this bash file gives us an absolute path to the LLDB command without requiring us to know where it is\n\n")
 						.appund("lldb \"$@\"\n\n")
+						.closeFile
+						.makeExecutable
+
+				case ("linux", "amd64") =>
+					System.err.println("WARN; Debugging on Linux is ... not tested ... yet")
+					new OverWriter(getProject.getRootProject.getBuildDir / "pGDB.sh")
+						.appund("#!/bin/bash\n\n")
+						.appund("#this bash file gives us an absolute path to the GDB command without requiring us to know where it is\n\n")
+						.appund("gdb \"$@\"\n\n")
 						.closeFile
 						.makeExecutable
 			}
@@ -105,7 +114,7 @@ object VCodeGradle {
 		override def taskArgs: List[Object] =
 			super.taskArgs.reverse match {
 				case head :: tail =>
-					(head :: s"-Dcgc3-gcc-args='${getProject.getRootProject.ext[CGC3.Root].gccArgs}'" :: tail)
+					(head :: s"-Dcgc3GCCArgs='${getProject.getRootProject.ext[CGC3.Root].cgc3GCCArgs}'" :: tail)
 						.reverse
 			}
 	}

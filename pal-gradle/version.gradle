@@ -1,11 +1,10 @@
 
-def peterVersionAuto = {
-	"??? unknown???"
+def versionString = {
+	"v2018-08-22"
 }
 
 repositories {
 	maven { url "https://peterlavalle.github.io/m2-repo/" }
-	maven { url rootProject.file('../peterlavalle.sbt/target/m2-repo/') }
 	mavenCentral()
 	jcenter()
 	maven {
@@ -15,7 +14,7 @@ repositories {
 }
 
 project.ext.pal = new Object() {
-	def peterVersion = peterVersionAuto()
+	def peterVersion = versionString()
 	def scalaFlavour = '2.12'
 	def scalaVersion = "${scalaFlavour}.4"
 	def toolingApiVersion = gradle.gradleVersion
@@ -27,3 +26,4 @@ allprojects {
 	version = pal.peterVersion
 }
 
+println('pal.version = ' + pal.peterVersion)

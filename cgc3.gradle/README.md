@@ -58,7 +58,7 @@ Assuming that you have your root project, and, `:shared` `:binary`, and `:checks
 ```
   buildscript {
     def version = {
-      "??? unknown???"
+      "v2018-08-22"
     }
     repositories {
       maven { url "https://peterlavalle.github.io/m2-repo/" }

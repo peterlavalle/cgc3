@@ -1,10 +1,13 @@
 
 
 // be sure that the repository exists
-
-
 if (!rootProject.file("../peterlavalle.sbt/target/m2-repo/com/peterlavalle/peterlavalle_2.12/${pal.peterVersion}/peterlavalle_2.12-${pal.peterVersion}.jar").exists()) {
   println("I didn't find BASECODE, so I'm building it ...")
+  //
+  // if you got a funky error about cgc3-plugins around here? re-commit the project and keep `[deploy]` out of the description
+  // ... though ... i might have to kill that
+  //
+
   ant.java(
     jar: rootProject.file("../peterlavalle.sbt/sbt-launch.jar"),
     fork: true,

@@ -1,6 +1,6 @@
 buildscript {
 	def peterVersion =
-		"??? unknown???"
+		"v2018-08-22"
 	repositories {
 		maven { url "${System.properties['user.home']}/.m2/repository/" }
 		mavenCentral()

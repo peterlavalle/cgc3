@@ -7,18 +7,30 @@ trait AppArgs {
 	this: App =>
 
 	def arg(name: String, default: String): String = {
-		val key = s"-$name="
-		(args.toList.filter((_: String).startsWith(key)) match {
-			case Nil =>
-				System.getProperty(name, default)
-			case List(value) =>
-				value.substring(key.length)
-		}) match {
-			case value: String if value.startsWith("'") && value.endsWith("'") => ???
-			case value: String if value.startsWith("\"") && value.endsWith("\"") => ???
-			case value: String =>
-				value
+
+		val raw: String = {
+			val key = s"-$name="
+			args.toList.filter((_: String).startsWith(key)) match {
+				case Nil =>
+					System.getProperty(name, default)
+				case List(value: String) =>
+					value.substring(key.length)
+			}
 		}
+
+		val value: String =
+			raw match {
+				case value: String if value.startsWith("'") && value.endsWith("'") && 2 <= value.size =>
+					value.tail.reverse.tail.reverse
+
+				case value: String if value.startsWith("\"") && value.endsWith("\"") => ???
+
+				case value: String =>
+					value
+			}
+
+		println(s"-$name = `$value`")
+		value
 	}
 
 	def arg(name: String, default: File): File =

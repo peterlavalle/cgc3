@@ -1,15 +1,12 @@
 
-lazy val isRelease =
-	System.getProperty("release", "false") match {
-		case "true" => true
-		case "false" => false
-	}
-
+lazy val versionString: String = {
+	"v2018-08-22"
+}
 lazy val commonSettings =
 	Seq(
 		organization := "com.peterlavalle",
 		version := {
-			"??? unknown???"
+			versionString
 		},
 		javacOptions ++= Seq("-encoding", "UTF-8"),
 		scalaVersion := "2.12.3",
